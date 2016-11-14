@@ -42,6 +42,7 @@ type ResponseItem struct {
 
 type Response struct {
 	Objects []ResponseItem `json:"objects"`
+	Version string  	   `json:"version"`
 	Error   string         `json:"error"`
 }
 
@@ -100,7 +101,7 @@ func (c *Compiler) CompilerRequest(file string, includes map[string]*IncludedFil
 func Compile(req *Request) *Response {
 
 	if _, ok := Languages[req.Language]; !ok {
-		return compilerResponse("", "", "", fmt.Errorf("No script provided"))
+		return compilerResponse("", "", "", "", fmt.Errorf("No script provided"))
 	}
 
 	lang := Languages[req.Language]
@@ -113,7 +114,7 @@ func Compile(req *Request) *Response {
 		os.Chdir(lang.CacheDir)
 		file, err := createTemporaryFile(k, v.Script)
 		if err != nil {
-			return compilerResponse("", "", "", err)
+			return compilerResponse("", "", "", "", err)
 		}
 		defer os.Remove(file.Name())
 		includes = append(includes, file.Name())
@@ -134,7 +135,7 @@ func Compile(req *Request) *Response {
 			"command":  command,
 			"response": hexCode,
 		}).Debug("Could not compile")
-		return compilerResponse("", "", "", fmt.Errorf("%v", hexCode))
+		return compilerResponse("", "", "", "", fmt.Errorf("%v", hexCode))
 	}
 
 	solcResp := BlankSolcResponse()
@@ -144,7 +145,7 @@ func Compile(req *Request) *Response {
 	err = json.Unmarshal([]byte(hexCode), solcResp)
 	if err != nil {
 		log.Debug("Could not unmarshal json")
-		return compilerResponse("", "", "", err)
+		return compilerResponse("", "", "", "", err)
 	}
 	respItemArray := make([]ResponseItem, 0)
 
@@ -167,6 +168,7 @@ func Compile(req *Request) *Response {
 
 	return &Response{
 		Objects: respItemArray,
+		Version: solcResp.Version,
 		Error:   "",
 	}
 }
@@ -191,7 +193,7 @@ func (l LangConfig) Cmd(includes []string, libraries string, optimize bool) (arg
 }
 
 // New response object from bytecode and an error
-func compilerResponse(objectname string, bytecode string, abi string, err error) *Response {
+func compilerResponse(objectname string, bytecode string, abi string, version string, err error) *Response {
 	e := ""
 	if err != nil {
 		e = err.Error()
@@ -207,6 +209,7 @@ func compilerResponse(objectname string, bytecode string, abi string, err error)
 
 	return &Response{
 		Objects: respItemArray,
+		Version: version,
 		Error:   e,
 	}
 }
