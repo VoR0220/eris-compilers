@@ -39,7 +39,7 @@ var compileCmd = &cobra.Command{
 			os.Exit(0)
 		}
 		url := createUrl()
-		output, err := cli.BeginCompile(url, args[0], optimizeSolc, libraries)
+		output, err := cli.BeginCompile(url, args[0], optimizeSolc, optimizeRounds, libraries)
 		if err != nil {
 			log.Error(err)
 		}
