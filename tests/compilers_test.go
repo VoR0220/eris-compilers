@@ -9,10 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	net "github.com/eris-ltd/eris-compilers/network"
+	"github.com/eris-ltd/eris-compilers/perform"
+	"github.com/eris-ltd/eris-compilers/definitions"
 	"github.com/eris-ltd/eris-compilers/util"
 
-	"github.com/eris-ltd/common/go/common"
+	"github.com/eris-ltd/eris-cli/config"
 )
 
 func TestRequestCreation(t *testing.T) {
@@ -22,14 +23,14 @@ func TestRequestCreation(t *testing.T) {
         uint8[5] memory foo3 = [1, 1, 1, 1, 1];
     }
 }`
-	var testMap = map[string]*util.IncludedFiles{
+	var testMap = map[string]*definitions.IncludedFiles{
 		"13db7b5ea4e589c03c4b09b692723247c4029ab59047957940b06e1611be66ba.sol": {
 			ObjectNames: []string{"c"},
 			Script:      []byte(contractCode),
 		},
 	}
 
-	req, err := util.CreateRequest("simpleContract.sol", "", false)
+	req, err := perform.CreateRequest("simpleContract.sol", "", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,10 +50,10 @@ func TestRequestCreation(t *testing.T) {
 }
 
 func TestServerSingle(t *testing.T) {
-	testServer := httptest.NewServer(http.HandlerFunc(net.CompileHandler))
+	testServer := httptest.NewServer(http.HandlerFunc(perform.CompileHandler))
 	defer testServer.Close()
 
-	expectedSolcResponse := util.BlankSolcResponse()
+	expectedSolcResponse := definitions.BlankSolcResponse()
 
 	actualOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "simpleContract.sol").Output()
 	if err != nil {
@@ -61,23 +62,25 @@ func TestServerSingle(t *testing.T) {
 	output := strings.TrimSpace(string(actualOutput))
 	err = json.Unmarshal([]byte(output), expectedSolcResponse)
 
-	respItemArray := make([]util.ResponseItem, 0)
+	respItemArray := make([]perform.ResponseItem, 0)
 
 	for contract, item := range expectedSolcResponse.Contracts {
-		respItem := util.ResponseItem{
+		respItem := perform.ResponseItem{
 			Objectname: strings.TrimSpace(contract),
 			Bytecode:   strings.TrimSpace(item.Bin),
 			ABI:        strings.TrimSpace(item.Abi),
 		}
 		respItemArray = append(respItemArray, respItem)
 	}
-	expectedResponse := &util.Response{
+	expectedResponse := &perform.Response{
 		Objects: respItemArray,
+		Warning: "",
+		Version: "",
 		Error:   "",
 	}
-	util.ClearCache(common.SolcScratchPath)
+	util.ClearCache(config.SolcScratchPath)
 	t.Log(testServer.URL)
-	resp, err := net.BeginCompile(testServer.URL, "simpleContract.sol", false, "")
+	resp, err := perform.RequestCompile(testServer.URL, "simpleContract.sol", false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,14 +88,14 @@ func TestServerSingle(t *testing.T) {
 		t.Errorf("Got incorrect response, expected %v, \n\n got %v", expectedResponse, resp)
 	}
 
-	util.ClearCache(common.SolcScratchPath)
+	util.ClearCache(config.SolcScratchPath)
 }
 
 func TestServerMulti(t *testing.T) {
-	testServer := httptest.NewServer(http.HandlerFunc(net.CompileHandler))
+	testServer := httptest.NewServer(http.HandlerFunc(perform.CompileHandler))
 	defer testServer.Close()
-	util.ClearCache(common.SolcScratchPath)
-	expectedSolcResponse := util.BlankSolcResponse()
+	util.ClearCache(config.SolcScratchPath)
+	expectedSolcResponse := definitions.BlankSolcResponse()
 
 	actualOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "contractImport1.sol").Output()
 	if err != nil {
@@ -101,23 +104,25 @@ func TestServerMulti(t *testing.T) {
 	output := strings.TrimSpace(string(actualOutput))
 	err = json.Unmarshal([]byte(output), expectedSolcResponse)
 
-	respItemArray := make([]util.ResponseItem, 0)
+	respItemArray := make([]perform.ResponseItem, 0)
 
 	for contract, item := range expectedSolcResponse.Contracts {
-		respItem := util.ResponseItem{
+		respItem := perform.ResponseItem{
 			Objectname: strings.TrimSpace(contract),
 			Bytecode:   strings.TrimSpace(item.Bin),
 			ABI:        strings.TrimSpace(item.Abi),
 		}
 		respItemArray = append(respItemArray, respItem)
 	}
-	expectedResponse := &util.Response{
+	expectedResponse := &perform.Response{
 		Objects: respItemArray,
+		Warning: "",
+		Version: "",
 		Error:   "",
 	}
-	util.ClearCache(common.SolcScratchPath)
+	util.ClearCache(config.SolcScratchPath)
 	t.Log(testServer.URL)
-	resp, err := net.BeginCompile(testServer.URL, "contractImport1.sol", false, "")
+	resp, err := perform.RequestCompile(testServer.URL, "contractImport1.sol", false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,12 +135,12 @@ func TestServerMulti(t *testing.T) {
 	if !allClear {
 		t.Errorf("Got incorrect response, expected %v, \n\n got %v", expectedResponse, resp)
 	}
-	util.ClearCache(common.SolcScratchPath)
+	util.ClearCache(config.SolcScratchPath)
 }
 
 func TestLocalMulti(t *testing.T) {
-	util.ClearCache(common.SolcScratchPath)
-	expectedSolcResponse := util.BlankSolcResponse()
+	util.ClearCache(config.SolcScratchPath)
+	expectedSolcResponse := definitions.BlankSolcResponse()
 
 	actualOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "contractImport1.sol").Output()
 	if err != nil {
@@ -144,22 +149,24 @@ func TestLocalMulti(t *testing.T) {
 	output := strings.TrimSpace(string(actualOutput))
 	err = json.Unmarshal([]byte(output), expectedSolcResponse)
 
-	respItemArray := make([]util.ResponseItem, 0)
+	respItemArray := make([]perform.ResponseItem, 0)
 
 	for contract, item := range expectedSolcResponse.Contracts {
-		respItem := util.ResponseItem{
+		respItem := perform.ResponseItem{
 			Objectname: strings.TrimSpace(contract),
 			Bytecode:   strings.TrimSpace(item.Bin),
 			ABI:        strings.TrimSpace(item.Abi),
 		}
 		respItemArray = append(respItemArray, respItem)
 	}
-	expectedResponse := &util.Response{
+	expectedResponse := &perform.Response{
 		Objects: respItemArray,
+		Warning: "",
+		Version: "",
 		Error:   "",
 	}
-	util.ClearCache(common.SolcScratchPath)
-	resp, err := net.BeginCompile("", "contractImport1.sol", false, "")
+	util.ClearCache(config.SolcScratchPath)
+	resp, err := perform.RequestCompile("", "contractImport1.sol", false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -172,12 +179,12 @@ func TestLocalMulti(t *testing.T) {
 	if !allClear {
 		t.Errorf("Got incorrect response, expected %v, \n\n got %v", expectedResponse, resp)
 	}
-	util.ClearCache(common.SolcScratchPath)
+	util.ClearCache(config.SolcScratchPath)
 }
 
 func TestLocalSingle(t *testing.T) {
-	util.ClearCache(common.SolcScratchPath)
-	expectedSolcResponse := util.BlankSolcResponse()
+	util.ClearCache(config.SolcScratchPath)
+	expectedSolcResponse := definitions.BlankSolcResponse()
 
 	actualOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "simpleContract.sol").Output()
 	if err != nil {
@@ -186,39 +193,41 @@ func TestLocalSingle(t *testing.T) {
 	output := strings.TrimSpace(string(actualOutput))
 	err = json.Unmarshal([]byte(output), expectedSolcResponse)
 
-	respItemArray := make([]util.ResponseItem, 0)
+	respItemArray := make([]perform.ResponseItem, 0)
 
 	for contract, item := range expectedSolcResponse.Contracts {
-		respItem := util.ResponseItem{
+		respItem := perform.ResponseItem{
 			Objectname: strings.TrimSpace(contract),
 			Bytecode:   strings.TrimSpace(item.Bin),
 			ABI:        strings.TrimSpace(item.Abi),
 		}
 		respItemArray = append(respItemArray, respItem)
 	}
-	expectedResponse := &util.Response{
+	expectedResponse := &perform.Response{
 		Objects: respItemArray,
+		Warning: "",
+		Version: "",
 		Error:   "",
 	}
-	util.ClearCache(common.SolcScratchPath)
-	resp, err := net.BeginCompile("", "simpleContract.sol", false, "")
+	util.ClearCache(config.SolcScratchPath)
+	resp, err := perform.RequestCompile("", "simpleContract.sol", false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(expectedResponse, resp) {
 		t.Errorf("Got incorrect response, expected %v, \n\n got %v", expectedResponse, resp)
 	}
-	util.ClearCache(common.SolcScratchPath)
+	util.ClearCache(config.SolcScratchPath)
 }
 
 func TestFaultyContract(t *testing.T) {
-	util.ClearCache(common.SolcScratchPath)
-	var expectedSolcResponse util.Response
+	util.ClearCache(config.SolcScratchPath)
+	var expectedSolcResponse perform.Response
 
 	actualOutput, err := exec.Command("solc", "--combined-json", "bin,abi", "faultyContract.sol").CombinedOutput()
 	err = json.Unmarshal(actualOutput, expectedSolcResponse)
 	t.Log(expectedSolcResponse.Error)
-	resp, err := net.BeginCompile("", "faultyContract.sol", false, "")
+	resp, err := perform.RequestCompile("", "faultyContract.sol", false, "")
 	t.Log(resp.Error)
 	if err != nil {
 		if expectedSolcResponse.Error != resp.Error {
@@ -229,7 +238,7 @@ func TestFaultyContract(t *testing.T) {
 	err = json.Unmarshal([]byte(output), expectedSolcResponse)
 }
 
-func contains(s []util.ResponseItem, e util.ResponseItem) bool {
+func contains(s []perform.ResponseItem, e perform.ResponseItem) bool {
 	for _, a := range s {
 		if a == e {
 			return true

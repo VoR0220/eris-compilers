@@ -6,10 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	cli "github.com/eris-ltd/eris-compilers/network"
-	"github.com/eris-ltd/eris-compilers/util"
+	"github.com/eris-ltd/eris-compilers/perform"
 	"github.com/eris-ltd/eris-compilers/version"
-	log "github.com/eris-ltd/eris-logger"
+	"github.com/eris-ltd/eris-cli/log"
 
 	"github.com/spf13/cobra"
 )
@@ -39,11 +38,11 @@ var compileCmd = &cobra.Command{
 			os.Exit(0)
 		}
 		url := createUrl()
-		output, err := cli.BeginCompile(url, args[0], optimizeSolc, libraries)
+		output, err := perform.RequestCompile(url, args[0], optimizeSolc, libraries)
 		if err != nil {
 			log.Error(err)
 		}
-		util.PrintResponse(*output, true)
+		perform.PrintResponse(*output, true)
 	},
 }
 

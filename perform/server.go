@@ -1,4 +1,4 @@
-package network
+package perform
 
 import (
 	"encoding/json"
@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/eris-ltd/eris-compilers/util"
+	"github.com/eris-ltd/eris-compilers/definitions"
 
-	"github.com/eris-ltd/common/go/common"
-	log "github.com/eris-ltd/eris-logger"
+	"github.com/eris-ltd/eris-cli/config"
+	"github.com/eris-ltd/eris-cli/log"
 )
 
 // Start the compile server
 func StartServer(addrUnsecure, addrSecure, cert, key string) {
 	log.Warn("Hello I'm the marmots' compilers server")
-	common.InitErisDir()
+	config.InitErisDir()
 	// Routes
 
 	http.HandleFunc("/", CompileHandler)
@@ -56,7 +56,7 @@ func CompileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // read in the files from the request, compile them
-func compileResponse(w http.ResponseWriter, r *http.Request) *util.Response {
+func compileResponse(w http.ResponseWriter, r *http.Request) *Response {
 	// read the request body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -66,7 +66,7 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *util.Response {
 	}
 
 	// unmarshall body into req struct
-	req := new(util.Request)
+	req := new(definitions.Request)
 	err = json.Unmarshal(body, req)
 	if err != nil {
 		log.Errorln("err on json unmarshal of request", err)
@@ -81,23 +81,23 @@ func compileResponse(w http.ResponseWriter, r *http.Request) *util.Response {
 		"incl": req.Includes,
 	}).Debug("New Request")
 
-	cached := util.CheckCached(req.Includes, req.Language)
+	cached := CheckCached(req.Includes, req.Language)
 
 	log.WithField("cached?", cached).Debug("Cached Item(s)")
 
-	var resp *util.Response
+	var resp *Response
 	// if everything is cached, no need for request
 	if cached {
-		resp, err = util.CachedResponse(req.Includes, req.Language)
+		resp, err = CachedResponse(req.Includes, req.Language)
 		if err != nil {
 			log.Errorln("err during caching response", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return nil
 		}
 	} else {
-		resp = util.Compile(req)
+		resp = compile(req)
 		resp.CacheNewResponse(*req)
 	}
-	util.PrintResponse(*resp, false)
+	PrintResponse(*resp, false)
 	return resp
 }

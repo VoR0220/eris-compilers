@@ -1,46 +1,88 @@
-hash: d52aac842cc5aa5dfe6dfab97bc5af4df445c4e1bd6bd9cf570182c0f8614d70
-updated: 2016-07-19T09:21:20.155669139-05:00
+hash: 63559c86d57f38223897eb970cb21277af090de516ca811bed952a8f5e57611a
+updated: 2016-11-29T16:23:49.078181898-06:00
 imports:
-- name: github.com/Azure/go-ansiterm
-  version: fa152c58bc15761d0200cb75fe958b89a9d4888e
-  subpackages:
-  - winterm
 - name: github.com/bugsnag/bugsnag-go
-  version: 31ae3484de3e96dbc4de1756b14ad6393b94103c
+  version: 718a5c3648c101c24adc20b7d3fe0be7af35a17a
   subpackages:
   - errors
-- name: github.com/bugsnag/osext
-  version: 0dd3f918b21bec95ace9dc86c7e70266cfc5c702
 - name: github.com/bugsnag/panicwrap
-  version: d6191e27ad06236eaad65d79e49a08b03b9f8029
-- name: github.com/docker/docker
-  version: d4bff5e3aa014f7062f1d7a6c929336e2a88faff
-  subpackages:
-  - pkg/term
-  - pkg/system
-  - pkg/term/windows
-- name: github.com/docker/go-units
-  version: f2d77a61e3c169b43402a0a1e84f06daf29b8190
-- name: github.com/ebuchman/go-shell-pipes
-  version: 83e1324808622485314bff0fd97b8b944200a7a4
+  version: aa7703c9414b36d4e9b2e42e6c704d0bfae7db64
+- name: github.com/BurntSushi/toml
+  version: 99064174e013895bbd9b025c31100bd1d9b590ca
 - name: github.com/eris-ltd/common
-  version: 875c64ec7e1525b3c8e0efed7d4974665fff4942
+  version: 8ca15f5455104403db4202c995e2f6e161654c02
   subpackages:
-  - go/common
-- name: github.com/eris-ltd/eris-logger
-  version: ea48a395d6ecc0eccc67a26da9fc7a6106fabb84
+  - go/docs
+- name: github.com/eris-ltd/eris-cli
+  version: 002c63e2d0850b33c279c29fee52dd30853e100d
+  subpackages:
+  - config
+  - log
+  - version
+- name: github.com/fsnotify/fsnotify
+  version: bd2828f9f176e52d7222e565abb2d338d3f3c103
+- name: github.com/hashicorp/hcl
+  version: 99ce73d4fe576449f7a689d4fc2b2ad09a86bdaa
+  subpackages:
+  - hcl/ast
+  - hcl/parser
+  - hcl/scanner
+  - hcl/strconv
+  - hcl/token
+  - json/parser
+  - json/scanner
+  - json/token
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
-- name: github.com/mitchellh/go-homedir
-  version: 756f7b183b7ab78acdbbee5c7f392838ed459dda
-- name: github.com/Sirupsen/logrus
-  version: f3cfb454f4c209e6668c95216c4744b8fddb2356
+- name: github.com/kardianos/osext
+  version: c2c54e542fb797ad986b31721e1baedf214ca413
+- name: github.com/kr/fs
+  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
+- name: github.com/magiconair/properties
+  version: 0723e352fa358f9322c938cc2dadda874e9151a9
+- name: github.com/mitchellh/mapstructure
+  version: f3009df150dadf309fdee4a54ed65c124afad715
+- name: github.com/pelletier/go-buffruneio
+  version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
+- name: github.com/pelletier/go-toml
+  version: 45932ad32dfdd20826f5671da37a5f3ce9f26a8d
+- name: github.com/pkg/errors
+  version: 839d9e913e063e28dfd0e6c7b7512793e0a48be9
+- name: github.com/pkg/sftp
+  version: 4d0e916071f68db74f8a73926335f809396d6b42
+- name: github.com/spf13/afero
+  version: 52e4a6cfac46163658bd4f123c49b6ee7dc75f78
+  subpackages:
+  - mem
+  - sftp
+- name: github.com/spf13/cast
+  version: 2580bc98dc0e62908119e4737030cc2fdfc45e4c
 - name: github.com/spf13/cobra
-  version: 6a8bd97bdb1fc0d08a83459940498ea49d3e8c93
+  version: 856b96dcb49d6427babe192998a35190a12c2230
+- name: github.com/spf13/jwalterweatherman
+  version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
 - name: github.com/spf13/pflag
-  version: 367864438f1b1a3c7db4da06a2f55b144e6784e0
+  version: 5ccb023bc27df288a957c5e994cd44fd19619465
+- name: github.com/spf13/viper
+  version: 80ab6657f9ec7e5761f6603320d3d58dfe6970f6
+- name: github.com/tcnksm/go-gitconfig
+  version: 6411ba19847f20afe47f603328d97aaeca6def6f
+- name: golang.org/x/crypto
+  version: 1150b8bd09e53aea1d415621adae9bad665061a1
+  subpackages:
+  - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
+  - ssh
 - name: golang.org/x/sys
-  version: 62bee037599929a6e9146f29d10dd5208c43507d
+  version: c200b10b5d5e122be351b67af224adc6128af5bf
   subpackages:
   - unix
-devImports: []
+- name: golang.org/x/text
+  version: 2556e8494a202e0b4008f70eda8cdb089b03fa50
+  subpackages:
+  - transform
+  - unicode/norm
+- name: gopkg.in/yaml.v2
+  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
+testImports: []

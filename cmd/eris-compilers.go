@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/eris-ltd/eris-compilers/version"
-
-	log "github.com/eris-ltd/eris-logger"
+	
+	"github.com/eris-ltd/eris-cli/log"
 	"github.com/spf13/cobra"
 )
 
